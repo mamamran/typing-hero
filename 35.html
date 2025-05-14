@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>⚾&nbsp;숫자야구&nbsp;⚾</title>
+    <style>
+        /* 전체 배경과 텍스트 스타일 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fce4ec; /* 부드러운 핑크색 배경 */
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+        }
+
+        /* 제목 스타일 */
+        h2 {
+            font-size: 50px;
+            color: #ff6f61; /* 따뜻한 색상의 제목 */
+            margin-bottom: 20px;
+        }
+
+        hr {
+            width: 50%;
+            border-top: 3px solid #ff6f61; /* 제목 색상과 일치하는 구분선 */
+            margin: 20px auto;
+        }
+
+        /* 숫자야구 아이콘 스타일 */
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            color: #ff6f61;
+            margin-bottom: 20px;
+        }
+
+        header h2 {
+            margin-right: 10px; /* 아이콘과 텍스트 사이 여백 */
+        }
+
+        /* 입력 필드 스타일 */
+        input[type="text"] {
+            font-size: 30px;
+            padding: 12px;
+            width: 250px;
+            border-radius: 10px;
+            border: 2px solid #ffb3b3;
+            margin-top: 20px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        /* 입력 필드 포커스 스타일 */
+        input[type="text"]:focus {
+            border-color: #28a745; /* 초록색 포커스 border */
+        }
+
+        /* 버튼 스타일 */
+        button {
+            font-size: 30px;
+            padding: 12px 25px;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 버튼 Hover 스타일 */
+        button:hover {
+            background-color: #e24d42; /* 버튼 Hover 시 색상 변경 */
+        }
+
+        /* 결과 텍스트 스타일 */
+        #result {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        /* 각 시도 결과 표시 */
+        p {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #555;
+        }
+
+        /* 배경 색상 조정 */
+        .background {
+            background-color: #f1f8e9; /* 파스텔 그린 배경 */
+            padding: 40px;
+            border-radius: 15px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <section class="background">
+        <header>
+            <h2>⚾</h2>
+            <h2>숫자야구</h2>
+            <h2>⚾</h2>
+        </header>
+
+        <input type="text" id="userInput" maxlength="4" placeholder="4자리 숫자" />
+        <button onclick="checkGuess()">확인</button>
+        <div id="result"></div>
+    </section>
+
+    <script>
+        let answer = generateAnswer();  // 정답 생성
+        let attempts = 0;  // 시도 횟수 초기화
+
+        // 정답 생성 함수
+        function generateAnswer() {
+            const digits = [];
+            while (digits.length < 4) {
+                const randomDigit = Math.floor(Math.random() * 10);  // 0~9 사이의 랜덤 숫자
+                if (!digits.includes(randomDigit)) {
+                    digits.push(randomDigit);
+                }
+            }
+            return digits; // 4자리 숫자 배열 반환
+        }
+
+        // 사용자의 입력을 확인하는 함수
+        function checkGuess() {
+            const input = document.getElementById('userInput').value; // 사용자가 입력한 값
+            if (input.length !== 4 || isNaN(input)) { // 입력이 4자리가 아니거나 숫자가 아니면 경고
+                alert('4자리 숫자를 입력하세요.');
+                return;
+            }
+
+            const inputDigits = input.split('').map(Number); // 입력값을 숫자 배열로 변환
+            const uniqueDigits = new Set(inputDigits); // 중복 체크를 위한 Set
+            if (uniqueDigits.size !== 4) { // 중복된 숫자가 있으면 경고
+                alert('서로 다른 숫자를 입력해야 합니다.');
+                return;
+            }
+
+            let strike = 0; // 스트라이크 개수
+            let ball = 0; // 볼 개수
+
+            // 정답과 비교하여 스트라이크와 볼을 계산
+            for (let i = 0; i < 4; i++) {
+                if (inputDigits[i] === answer[i]) {
+                    strike++; // 같은 위치와 숫자가 맞으면 스트라이크
+                } else if (answer.includes(inputDigits[i])) {
+                    ball++; // 숫자는 맞지만 위치가 다르면 볼
+                }
+            }
+
+            attempts++; // 시도 횟수 증가
+
+            // 결과를 화면에 출력
+            const resultDiv = document.getElementById('result');
+            const resultText = document.createElement('p'); // 결과를 표시할 p 태그 생성
+            resultText.textContent = `${attempts}번째 시도: ${input} - ${strike} 스트라이크, ${ball} 볼`;
+            resultDiv.appendChild(resultText);
+
+            // 4 스트라이크일 경우 게임 종료
+            if (strike === 4) {
+                alert(`축하합니다! ${attempts}번 만에 맞췄습니다! 게임을 새로 시작합니다.`);
+                resetGame(); // 게임 리셋
+            }
+
+            // 입력 필드 초기화 및 포커스 설정
+            document.getElementById('userInput').value = '';
+            document.getElementById('userInput').focus();
+        }
+
+        // 게임을 초기화하는 함수
+        function resetGame() {
+            answer = generateAnswer(); // 새로운 정답 생성
+            attempts = 0; // 시도 횟수 초기화
+            document.getElementById('result').innerHTML = ''; // 결과 영역 초기화
+        }
+    </script>
+</body>
+
+</html>
